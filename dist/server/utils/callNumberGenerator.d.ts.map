@@ -1,0 +1,1 @@
+{"version":3,"file":"callNumberGenerator.d.ts","sourceRoot":"","sources":["../../../src/server/utils/callNumberGenerator.ts"],"names":[],"mappings":"AAOA,wBAAsB,kBAAkB,IAAI,OAAO,CAAC,MAAM,CAAC,CA8B1D;AAKD,wBAAgB,kBAAkB,CAAC,UAAU,EAAE,MAAM,GAAG,OAAO,CAG9D;AAKD,wBAAgB,eAAe,CAAC,UAAU,EAAE,MAAM,GAAG;IAAE,IAAI,EAAE,IAAI,CAAC;IAAC,QAAQ,EAAE,MAAM,CAAA;CAAE,GAAG,IAAI,CAa3F"}
