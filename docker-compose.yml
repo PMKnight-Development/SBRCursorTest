@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sbr-cad-postgres
+    environment:
+      POSTGRES_DB: sbr_cad
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sbr-cad-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: sbr-cad-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sbr-cad-network
+
+  # SBR CAD Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: sbr-cad-backend
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_NAME: sbr_cad
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: your-secret-key-change-in-production
+      JWT_REFRESH_SECRET: your-refresh-secret-key-change-in-production
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/client/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sbr-cad-network
+    command: npm run dev
+
+  # SBR CAD Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+    container_name: sbr-cad-frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:3000
+      REACT_APP_WS_URL: ws://localhost:3000
+    volumes:
+      - ./client:/app/client
+      - /app/client/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+    networks:
+      - sbr-cad-network
+    command: cd client && npm start
+
+  # Nginx reverse proxy (for production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: sbr-cad-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - sbr-cad-network
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  sbr-cad-network:
+    driver: bridge 

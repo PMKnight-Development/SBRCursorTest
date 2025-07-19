@@ -1,0 +1,144 @@
+:root {
+  --background-day: #f5f5f5;
+  --background-night: #23272f;
+  --text-day: #222;
+  --text-night: #eee;
+}
+
+[data-theme='dark'] {
+  --background: var(--background-night);
+  --text: var(--text-night);
+}
+[data-theme='light'] {
+  --background: var(--background-day);
+  --text: var(--text-day);
+}
+
+.mapContainer {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive design for different screen sizes */
+@media (max-width: 768px) {
+  .mapContainer {
+    height: calc(100vh - 56px); /* Account for mobile navigation */
+  }
+}
+
+@media (max-width: 480px) {
+  .mapContainer {
+    height: calc(100vh - 48px);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.statusIndicator {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .statusIndicator {
+    top: 8px;
+    right: 8px;
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+.controlButtons {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .controlButtons {
+    bottom: 8px;
+    left: 8px;
+    gap: 6px;
+  }
+  
+  .controlButtons .MuiFab-root {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorAlert {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .errorAlert {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+}
+
+/* Basemap dialog responsive adjustments */
+@media (max-width: 480px) {
+  .MuiDialog-paper {
+    margin: 16px;
+    max-width: calc(100% - 32px) !important;
+  }
+} 

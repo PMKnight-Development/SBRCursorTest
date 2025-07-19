@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS API Test</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ccc;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>ArcGIS API Loading Test</h1>
+    <div id="status"></div>
+    <div id="map"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusDiv.appendChild(div);
+            console.log(message);
+        }
+
+        function testArcGISLoading() {
+            log('Starting ArcGIS API test...', 'info');
+
+            // Load ArcGIS script
+            const script = document.createElement('script');
+            script.src = 'https://js.arcgis.com/4.31/';
+            script.async = true;
+            script.defer = true;
+
+            script.onload = () => {
+                log('ArcGIS script loaded successfully', 'success');
+                
+                // Check for require and esri
+                const checkInterval = setInterval(() => {
+                    log(`Checking API... require: ${!!window.require}, esri: ${!!window.esri}`, 'info');
+                    
+                    if (window.require && window.esri) {
+                        clearInterval(checkInterval);
+                        log('ArcGIS API fully loaded!', 'success');
+                        testModuleLoading();
+                    }
+                }, 1000);
+
+                // Timeout after 30 seconds
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    if (!window.require || !window.esri) {
+                        log('ArcGIS API failed to initialize within timeout', 'error');
+                    }
+                }, 30000);
+            };
+
+            script.onerror = (error) => {
+                log(`Failed to load ArcGIS script: ${error}`, 'error');
+            };
+
+            document.head.appendChild(script);
+        }
+
+        function testModuleLoading() {
+            log('Testing module loading...', 'info');
+            
+            const timeout = setTimeout(() => {
+                log('Module loading timeout', 'error');
+            }, 15000);
+
+            try {
+                window.require([
+                    "esri/Map",
+                    "esri/views/MapView",
+                    "esri/layers/FeatureLayer",
+                    "esri/layers/VectorTileLayer"
+                ], function(Map, MapView, FeatureLayer, VectorTileLayer) {
+                    clearTimeout(timeout);
+                    log('All modules loaded successfully!', 'success');
+                    log(`Map: ${typeof Map}`, 'info');
+                    log(`MapView: ${typeof MapView}`, 'info');
+                    log(`FeatureLayer: ${typeof FeatureLayer}`, 'info');
+                    log(`VectorTileLayer: ${typeof VectorTileLayer}`, 'info');
+                    
+                    // Test creating a simple map
+                    try {
+                        const map = new Map({
+                            basemap: 'satellite'
+                        });
+
+                        const view = new MapView({
+                            container: 'map',
+                            map: map,
+                            zoom: 13,
+                            center: [-81.1196, 37.9150]
+                        });
+
+                        log('Map created and displayed successfully!', 'success');
+                    } catch (error) {
+                        log(`Error creating map: ${error.message}`, 'error');
+                    }
+                }, function(error) {
+                    clearTimeout(timeout);
+                    log(`Module loading failed: ${error.message}`, 'error');
+                });
+            } catch (error) {
+                clearTimeout(timeout);
+                log(`Error calling require: ${error.message}`, 'error');
+            }
+        }
+
+        // Start the test when page loads
+        window.onload = testArcGISLoading;
+    </script>
+</body>
+</html> 
